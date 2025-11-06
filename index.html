@@ -1,45 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Fix: Corrected charset from UTF-g to UTF-8 -->
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vibe Coding of Augusta - Spark AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Vibe Coding of Augusta</title>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'vibe-bg': '#111827',
-              'vibe-bg-light': '#1F2937',
-              'vibe-primary': '#4F46E5',
-              'vibe-primary-hover': '#4338CA',
-              'vibe-accent': '#10B981',
-              'vibe-text': '#E5E7EB',
-              'vibe-text-secondary': '#9CA3AF',
-            },
-          },
-        },
-      };
+      // Global runtime error overlay to avoid silent blank screens
+      window.addEventListener('error', function(e) {
+        try {
+          var el = document.getElementById('root');
+          if (el) {
+            el.innerHTML = '<pre style="white-space:pre-wrap;color:#991b1b;background:#fee2e2;padding:12px;border-radius:8px;">Runtime error: ' + (e.error && (e.error.stack || e.error.message) || e.message) + '</pre>';
+          }
+        } catch(_) {}
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        try {
+          var el = document.getElementById('root');
+          if (el) {
+            var reason = e.reason && (e.reason.stack || e.reason.message || e.reason) || 'unknown';
+            el.innerHTML = '<pre style="white-space:pre-wrap;color:#7c2d12;background:#ffedd5;padding:12px;border-radius:8px;">Unhandled rejection: ' + reason + '</pre>';
+          }
+        } catch(_) {}
+      });
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.552.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
-    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "firebase/app": "https://aistudiocdn.com/firebase@^10.12.2/app",
-    "firebase/auth": "https://aistudiocdn.com/firebase@^10.12.2/auth",
-    "firebase/": "https://aistudiocdn.com/firebase@^12.5.0/"
-  }
-}
-</script>
-</head>
-  <body class="bg-vibe-bg text-vibe-text antialiased">
+  </head>
+  <body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
+    <!-- Vite will handle module resolution from node_modules; no CDN import map needed -->
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

@@ -1,61 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import Dashboard from './components/Dashboard';
-import LandingPage from './components/LandingPage';
-import { SubscriptionTier } from './types';
-import { auth } from './services/firebase';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { Loader2 } from 'lucide-react';
+import React, { Suspense, lazy } from 'react';
+// Fix: Replaced BrowserRouter with HashRouter to fix routing in the sandboxed environment.
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth.tsx';
+import Header from './components/Header.tsx';
+import Footer from './components/Footer.tsx';
+import BottomNav from './components/navigation/BottomNav.tsx';
+import HomePage from './pages/HomePage.tsx';
+import DashboardPage from './pages/DashboardPage.tsx';
+import AdminPage from './pages/AdminPage.tsx';
+import AuthForm from './components/auth/AuthForm.tsx';
+import ProtectedRoute from './components/auth/ProtectedRoute.tsx';
+import LearningCenterPage from './pages/LearningCenterPage.tsx';
+import CheckoutPage from './pages/CheckoutPage.tsx';
+import InventoryPage from './pages/InventoryPage.tsx';
+import DiaryPage from './pages/DiaryPage.tsx';
+const SparkApp = lazy(() => import('./spark/App.tsx'));
 
-// Hardcoded subscription tier for demonstration purposes for any logged-in user.
-const proTier: SubscriptionTier = {
-  name: 'Spark Pro',
-  price: '$79',
-  features: [
-    'Priority access to Spark AI Assistant',
-    'Advanced AI features & tools',
-    'All Learning Resources',
-    'Priority Email & Chat Support',
-    'Early access to new features',
-    'Future: Sales-focused Dashboard',
-  ],
-  isFeatured: true,
-};
-
-const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsLoading(false);
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, []);
-
-  const handleLogout = () => {
-    signOut(auth).catch((error) => console.error('Logout Error:', error));
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-vibe-bg flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-vibe-primary" />
-      </div>
-    );
-  }
-
+export default function App() {
   return (
-    <div className="min-h-screen bg-vibe-bg">
-      {user ? (
-        <Dashboard user={user} subscriptionTier={proTier} onLogout={handleLogout} />
-      ) : (
-        <LandingPage />
-      )}
-    </div>
-  );
-};
+    <HashRouter>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          {/* Add bottom padding so content isn't hidden behind the sticky BottomNav on mobile */}
+          <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 md:pb-8">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<AuthForm mode="login" />} />
+              <Route path="/register" element={<AuthForm mode="register" />} />
+              <Route path="/learning/:slug" element={<LearningCenterPage />} />
+              <Route path="/checkout/:plan" element={<CheckoutPage />} />
+              
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute role="Super Administrator">
+                    <AdminPage />
+                  </ProtectedRoute>
+                } 
+              />
 
-export default App;
+              <Route 
+                path="/inventory" 
+                element={
+                  <ProtectedRoute>
+                    <InventoryPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route 
+                path="/diary" 
+                element={
+                  <ProtectedRoute>
+                    <DiaryPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Spark module route (lazy-loaded) */}
+              <Route
+                path="/spark/*"
+                element={
+                  <Suspense fallback={<div className="py-12 text-center text-slate-500">Loading Spark…</div>}>
+                    <SparkApp />
+                  </Suspense>
+                }
+              />
+
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </main>
+          {/* Sticky mobile bottom menu */}
+          <BottomNav />
+          <Footer />
+        </div>
+      </AuthProvider>
+    </HashRouter>
+  );
+}

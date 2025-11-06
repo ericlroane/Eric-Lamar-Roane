@@ -1,25 +1,37 @@
 {
-  "name": "vibe-coding-of-augusta---spark-ai",
-  "private": true,
-  "version": "0.0.0",
+  "name": "vibecoding-app",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:wp": "vite build --base=./",
+    "vercel-build": "vite build",
+    "preview": "vite preview",
+
+    "fb:version": "npx --yes firebase-tools --version",
+    "fb:login": "npx --yes firebase-tools login",
+    "fb:use": "npx --yes firebase-tools use studio-2047789106-e4e02",
+    "fb:secret": "npx --yes firebase-tools functions:secrets:set GEMINI_API_KEY",
+    "deploy:functions": "npx --yes firebase-tools deploy --only functions",
+    "deploy:hosting": "npm run build && npx --yes firebase-tools deploy --only hosting",
+    "deploy:all": "npm run build && npx --yes firebase-tools deploy"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
-    "lucide-react": "^0.552.0",
-    "react": "^19.2.0",
-    "@google/genai": "^1.28.0",
-    "react-markdown": "^10.1.0",
-    "firebase": "^12.5.0"
+    "firebase": "^10.12.2",
+    "lucide-react": "^0.451.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.5.3",
+    "vite": "^7.1.12"
   }
 }

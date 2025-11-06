@@ -1,8 +1,5 @@
+
 {
-  "name": "Vibe Coding of Augusta - Spark AI",
-  "description": "A web application for Vibe Coding of Augusta, featuring the AI Personal Assistant 'Spark'. This platform includes a subscription-based model and a personal user dashboard with AI chat, learning resources, and account management.",
-  "requestFramePermissions": [
-    "microphone",
-    "geolocation"
-  ]
+  "name": "Vibe Coding of Augusta",
+  "description": "A landing page for Vibe Coding of Augusta, an AI small business specialist. The application features information about AI services, user authentication, and an interactive AI assistant powered by the Gemini API."
 }

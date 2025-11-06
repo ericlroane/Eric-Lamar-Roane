@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Check if the caller is a Super Administrator by reading their user profile
+    function isSuperAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Administrator';
+    }
+
+    // Validate role field value
+    function isValidRole(role) {
+      return role in ['Super Administrator', 'Administrator', 'Manager', 'Salesperson', 'AI Helper'];
+    }
+
+    match /users/{userId} {
+      // Create own profile document
+      allow create: if isSelf(userId);
+
+      // Read own document; Super Admins can read any user
+      allow read: if isSelf(userId) || isSuperAdmin();
+
+      // Update own document (except role field); allow persona/subscription updates
+      allow update: if isSelf(userId)
+        && (
+          // Prevent non-admins from elevating their own role
+          !("role" in request.resource.data) || request.resource.data.role == resource.data.role
+        );
+
+      // Super Admins: allow updating only the role field on any user
+      allow update: if isSuperAdmin()
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['role'])
+        && isValidRole(request.resource.data.role);
+    }
+
+    // Owner-scoped collections
+    match /diary/{entryId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /inventory_schemas/{schemaId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /inventory_items/{itemId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /tasks/{taskId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /calendar_events/{eventId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // Deny deletes by default for everything else
+    match /{document=**} {
+      allow delete: if false;
+    }
+  }
+}
